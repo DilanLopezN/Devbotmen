@@ -1,11 +1,13 @@
-// electron/main.ts
+// electron/index.ts
 import { app, BrowserWindow, ipcMain } from 'electron'
 import * as path from 'path'
-import { fileURLToPath } from 'url' // ← Adicione isso
+import { fileURLToPath } from 'url'
 import {
   listContainers,
   startContainer,
-  stopContainer
+  stopContainer,
+  restartContainer,
+  getContainerLogs
 } from './dockerManager.js'
 
 // Para ES modules, __dirname precisa ser definido assim:
@@ -16,8 +18,8 @@ const isDev = !app.isPackaged
 
 function createWindow() {
   const win = new BrowserWindow({
-    width: 1000,
-    height: 700,
+    width: 1200,
+    height: 800,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js')
     }
@@ -36,4 +38,6 @@ app.whenReady().then(() => {
   ipcMain.handle('get-containers', listContainers)
   ipcMain.handle('start-container', (_, id) => startContainer(id))
   ipcMain.handle('stop-container', (_, id) => stopContainer(id))
+  ipcMain.handle('restart-container', (_, id) => restartContainer(id))
+  ipcMain.handle('get-container-logs', (_, id) => getContainerLogs(id))
 })
