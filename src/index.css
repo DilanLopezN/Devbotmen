@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+@theme {
+  /* cores neon e tema escuro */
+  --color-background: #0f172a;
+  --color-card: #1e293b;
+  --color-accent: #00f2ff;
+  --color-success: #00ff99;
+  --color-danger: #ff3f3f;
+  --color-warning: #ffcc00;
+
+  /* tipografia */
+  --font-sans: Inter, sans-serif;
+}
+
+/* Para garantir o font default base */
+@layer base {
+  body {
+    background-color: var(--color-background);
+    color: white;
+    font-family: var(--font-sans);
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "es2020",           // ← Mudança principal
+    "moduleResolution": "node",
+    "strict": true,
+    "jsx": "react-jsx",
+    "outDir": "dist-electron",
+    "rootDir": "./electron",
+    "esModuleInterop": true,
+    "allowImportingTsExtensions": false,  // ← Adicione
+    "noEmit": false          ,             // ← Adicione
+    "skipLibCheck": true
+  },
+  "include": ["electron"]
+}
