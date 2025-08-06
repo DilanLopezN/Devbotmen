@@ -1,135 +1,80 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
+import { ContainerView } from './components/ContainerView'
+import { DependencyTree } from './components/DependencyThree'
 
-type ContainerInfo = {
-  id: string
-  name: string
-  state: string
-  status: string
-  image: string
-  ports: string[]
-  uptime: string
-}
+type MenuOption = 'containers' | 'dependencies'
 
 function App() {
-  const [containers, setContainers] = useState<ContainerInfo[]>([])
-  const [selected, setSelected] = useState<ContainerInfo | null>(null)
+  const [activeView, setActiveView] = useState<MenuOption>('containers')
 
-  const fetch = async () => {
-    const list = await window.api.getContainers()
-    setContainers(list)
-  }
+  // Ícones do menu
+  const ContainerIcon = () => (
+    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+      <path d="M4 4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-5L9 2H4z" />
+    </svg>
+  )
 
-  const toggle = async (id: string, state: string) => {
-    if (state === 'running') {
-      await window.api.stopContainer(id)
-    } else {
-      await window.api.startContainer(id)
-    }
-    fetch()
-  }
-
-  useEffect(() => {
-    fetch()
-  }, [])
-
-  function StatusCard({
-    label,
-    value,
-    color
-  }: {
-    label: string
-    value: number
-    color: 'accent' | 'success' | 'danger'
-  }) {
-    const colorMap = {
-      accent: 'text-[--color-accent]',
-      success: 'text-[--color-success]',
-      danger: 'text-[--color-danger]'
-    }
-
-    return (
-      <div className="bg-[--color-card] p-3 rounded-lg text-center shadow border border-slate-700">
-        <div className={`text-lg font-bold ${colorMap[color]}`}>{value}</div>
-        <div className="text-xs text-slate-400">{label}</div>
-      </div>
-    )
-  }
-
-  function StatusDot({ state }: { state: string }) {
-    const color =
-      state === 'running'
-        ? 'bg-[--color-success]'
-        : state === 'exited'
-        ? 'bg-[--color-danger]'
-        : 'bg-[--color-warning]'
-    return <div className={`w-3 h-3 rounded-full ${color}`} />
-  }
+  const TreeIcon = () => (
+    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+      <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" />
+    </svg>
+  )
 
   return (
-    <div className="flex h-screen w-full font-sans bg-[--color-background] text-white">
-      {/* Sidebar */}
-      <div className="w-80 bg-[--color-card] p-4 flex flex-col shadow-lg border-r border-slate-800">
-        <h1 className="text-2xl font-bold text-[--color-accent] mb-4">
-          Docker Manager
-        </h1>
+    <div className="flex flex-col h-screen w-full font-sans bg-[--color-background] text-white">
+      {/* Menu Superior */}
+      <header className="bg-[--color-card] border-b border-slate-800 shadow-lg">
+        <div className="flex items-center justify-between px-6 py-3">
+          {/* Logo/Título */}
+          <div className="flex items-center gap-3">
+            <div className="text-2xl">🐳</div>
+            <h1 className="text-xl font-bold text-[--color-accent]">
+              Docker Manager
+            </h1>
+          </div>
 
-        {/* Status Summary */}
-        <div className="grid grid-cols-3 gap-2 mb-6">
-          <StatusCard label="Total" value={containers.length} color="accent" />
-          <StatusCard
-            label="Rodando"
-            value={containers.filter(c => c.state === 'running').length}
-            color="success"
-          />
-          <StatusCard
-            label="Parados"
-            value={containers.filter(c => c.state !== 'running').length}
-            color="danger"
-          />
-        </div>
-
-        {/* Container List */}
-        <h2 className="text-lg font-semibold mb-2">Containers</h2>
-        <div className="space-y-3 overflow-y-auto flex-1 pr-1">
-          {containers.map(c => (
-            <div
-              key={c.id}
-              className={`p-3 rounded-xl shadow-md cursor-pointer bg-[--color-background] border border-slate-700 hover:bg-slate-800 transition duration-200 ${
-                selected?.id === c.id ? 'ring-2 ring-[--color-accent]' : ''
+          {/* Menu de Navegação */}
+          <nav className="flex gap-2">
+            <button
+              onClick={() => setActiveView('containers')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 ${
+                activeView === 'containers'
+                  ? 'bg-[--color-accent] text-black font-medium shadow-lg shadow-[--color-accent]/30'
+                  : 'text-slate-400 hover:text-white hover:bg-slate-700'
               }`}
-              onClick={() => setSelected(c)}
             >
-              <div className="flex justify-between items-center mb-1">
-                <span className="text-md font-medium">{c.name}</span>
-                <StatusDot state={c.state} />
-              </div>
-              <p className="text-sm text-slate-400">{c.image}</p>
-              <p className="text-xs text-slate-500">{c.ports.join(', ')}</p>
-            </div>
-          ))}
-        </div>
-      </div>
+              <ContainerIcon />
+              <span>Containers</span>
+            </button>
 
-      {/* Main content */}
-      <div className="flex-1 p-10 text-center flex flex-col justify-center items-center text-slate-400">
-        {!selected ? (
-          <>
-            <div className="text-6xl mb-4">🖥️</div>
-            <p className="text-xl font-semibold">Selecione um Container</p>
-            <p className="text-sm">
-              Clique em um container na barra lateral para ver os detalhes
-            </p>
-          </>
-        ) : (
-          <>
-            <h2 className="text-2xl text-white mb-2">{selected.name}</h2>
-            <p className="mb-1">Image: {selected.image}</p>
-            <p className="mb-1">Status: {selected.status}</p>
-            <p className="mb-1">Portas: {selected.ports.join(', ')}</p>
-            <p className="mb-1">Uptime: {selected.uptime}</p>
-          </>
-        )}
-      </div>
+            <button
+              onClick={() => setActiveView('dependencies')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 ${
+                activeView === 'dependencies'
+                  ? 'bg-[--color-accent] text-black font-medium shadow-lg shadow-[--color-accent]/30'
+                  : 'text-slate-400 hover:text-white hover:bg-slate-700'
+              }`}
+            >
+              <TreeIcon />
+              <span>Árvore de Dependências</span>
+            </button>
+          </nav>
+
+          {/* Indicador de Status */}
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 px-3 py-1 bg-slate-700 rounded-full">
+              <div className="w-2 h-2 bg-[--color-success] rounded-full animate-pulse"></div>
+              <span className="text-xs text-slate-400">Docker Conectado</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Área de Conteúdo */}
+      <main className="flex-1 overflow-hidden">
+        {activeView === 'containers' && <ContainerView />}
+        {activeView === 'dependencies' && <DependencyTree />}
+      </main>
     </div>
   )
 }

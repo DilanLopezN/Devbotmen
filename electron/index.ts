@@ -7,7 +7,8 @@ import {
   startContainer,
   stopContainer,
   restartContainer,
-  getContainerLogs
+  getContainerLogs,
+  getDependencyTree
 } from './dockerManager.js'
 
 // Para ES modules, __dirname precisa ser definido assim:
@@ -40,4 +41,5 @@ app.whenReady().then(() => {
   ipcMain.handle('stop-container', (_, id) => stopContainer(id))
   ipcMain.handle('restart-container', (_, id) => restartContainer(id))
   ipcMain.handle('get-container-logs', (_, id) => getContainerLogs(id))
+  ipcMain.handle('get-dependency-tree', getDependencyTree)
 })
